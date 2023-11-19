@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bienvenue sur Corail</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      header {
+        text-align: center;
+        font-size: 24px;
+        margin-bottom: 20px;
+      }
+
+      img {
+        max-width: 300px;
+        height: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <div>
+      <header>Bienvenue sur Corail</header>
+      <% if (src) { %>
+      <img id="qrCodeImage" src="<%= src %>" alt="QR Code" />
+      <% } else { %>
+      <img id="qrCodeImage" src="scannerqr.jpg" alt="Scanner Image" />
+      <% } %>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.3/socket.io.js"></script>
+    <script>
+      const socket = io();
+
+      // Listen for changes to the 'src' variable
+      socket.on("srcChange", (newSrc) => {
+        const qrCodeImage = document.getElementById("qrCodeImage");
+        if (newSrc) {
+          qrCodeImage.src = newSrc;
+        } else {
+          qrCodeImage.src = "scannerqr.jpg";
+        }
+      });
+    </script>
+  </body>
+</html>
