@@ -7,6 +7,10 @@ const path = require("path");
 const qrcode = require("qrcode");
 const sequelize = require("./db/sequelize");
 const axios = require("axios"); // Import the axios library
+require("dotenv").config();
+const port = process.env.PORT || 3000;
+
+const apiUrl = process.env.API_URL;
 
 const app = express();
 const server = createServer(app);
@@ -42,36 +46,28 @@ app.get("/scan", (req, res) => {
 app.get("/api/login", (req, res) => {
   res.render("login", { errorMessage: null });
 });
-app.post("/api/login", (req, res) => {
-  if (req.body.login == "bilal" && req.body.password == "1234") {
-    res.redirect("/api/dashboard/clients");
-  } else {
-    res.render("login", {
-      errorMessage: "login or password are incorrect. Please try again.",
-    });
-  }
-});
-
-app.get("/api", (req, res) => {
-  res.render("index");
-});
+// app.post("/api/login", (req, res) => {
+//   if (req.body.login == "bilal" && req.body.password == "1234") {
+//     res.redirect("/api/dashboard/clients");
+//   } else {
+//     res.render("login", {
+//       errorMessage: "login or password are incorrect. Please try again.",
+//     });
+//   }
+// });
 
 require("./route/findticket")(app);
 require("./route/createticket")(app);
+require("./route/login")(app);
 
 let src = "";
 
 app.post("/api/data", async (req, res) => {
-  const jsonData = req.body.text;
-  const jsonDt = JSON.parse(jsonData);
-
+  const jsonData = req.body;
   try {
-    const response = await axios.post(
-      "http://localhost:3000/api/tickets",
-      jsonDt
-    );
-
-    qrcode.toDataURL(jsonData, (err, srcg) => {
+    const response = await axios.post(`${apiUrl}/api/tickets`, jsonData);
+    const dataString = JSON.stringify(jsonData);
+    qrcode.toDataURL(dataString, (err, srcg) => {
       if (err) {
         console.error("Error generating QR code:", err);
         res.status(500).json({ error: "Error generating QR code" });
@@ -79,6 +75,7 @@ app.post("/api/data", async (req, res) => {
         const src = srcg;
         console.log(src);
         io.emit("srcChange", src);
+        resetSrcValue();
         res.send("done");
       }
     });
@@ -96,10 +93,8 @@ function resetSrcValue() {
     src = newSrc;
     io.emit("srcChange", newSrc);
     console.log("Changed src:", newSrc);
-  }, 4000);
+  }, 6000);
 }
-
-// resetSrcValue();
 
 io.on("connection", (socket) => {
   // socket.on('src', (data)=>{
@@ -108,6 +103,12 @@ io.on("connection", (socket) => {
   // })
 });
 
-server.listen(3000, () => {
-  console.log("server running at http://localhost:3000");
+//test de cookies
+app.get("/api", (req, res) => {
+  res.setHeader("set-cookie", "foo=bar");
+  res.send("cookie is set");
+});
+
+server.listen(port, () => {
+  console.log(`Server running at http://localhost:${port}`);
 });

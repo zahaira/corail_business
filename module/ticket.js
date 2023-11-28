@@ -1,5 +1,5 @@
-module.exports = (sequelize, DataTypes) => {
-  return sequelize.define(
+module.exports = (sequelize1, DataTypes) => {
+  return sequelize1.define(
     "Ticket",
     {
       id: {
@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
       name: {
         type: DataTypes.STRING,
       },
-      
+
       email: {
         type: DataTypes.STRING,
         validate: {
