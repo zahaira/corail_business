@@ -9,7 +9,7 @@ const sequelize = require("./db/sequelize");
 const axios = require("axios"); // Import the axios library
 require("dotenv").config();
 const port = process.env.PORT || 3000;
-
+const cookieParser = require("cookie-parser");
 const apiUrl = process.env.API_URL;
 
 const app = express();
@@ -19,8 +19,9 @@ const io = new Server(server);
 sequelize.initDb();
 
 // Serve static files from the 'public' directory
-app.use(express.static("public"));
 app.use(bodyParser.json()); // Enable JSON body parsing
+app.use(cookieParser());
+app.use(express.static("public"));
 app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "view"));
@@ -105,7 +106,8 @@ io.on("connection", (socket) => {
 
 //test de cookies
 app.get("/api", (req, res) => {
-  res.setHeader("set-cookie", "foo=bar");
+  // res.setHeader("set-cookie", "foo=bar");
+  res.cookie("foo", "bar");
   res.send("cookie is set");
 });
 

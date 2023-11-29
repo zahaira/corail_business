@@ -2,7 +2,7 @@ const { User } = require("../db/sequelize");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const privateKey = require("../auth/private_key");
-
+const cookieParser = require("cookie-parser");
 module.exports = (app) => {
   app.post("/api/login", (req, res) => {
     User.findOne({ where: { username: req.body.username } })
@@ -25,7 +25,8 @@ module.exports = (app) => {
             const token = jwt.sign({ userId: user.id }, privateKey, {
               expiresIn: "24h",
             });
-            res.json({ token: token });
+            res.cookie("token", token);
+            res.redirect("/api/dashboard/clients");
           });
       })
       .catch((error) => {
